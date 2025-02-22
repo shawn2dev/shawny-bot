@@ -1,1 +1,1 @@
-# shawny-bot
+# 셔니봇 for discord
