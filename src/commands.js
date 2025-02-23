@@ -16,11 +16,11 @@ export const INVITE_COMMAND = {
 export const SHAWNY_COMMAND = {
   name: '셔니',
   description: '셔니가 해줘야하는 것',
-  response: '다빈이랑 놀아줘!!!',
+  response: '<@851312069915574332>, 다빈이랑 놀아줘!!!',
 };
 
 export const DABIN_COMMAND = {
   name: '다빈',
   description: '다빈이가 해야하는 것',
-  response: '셔니에게 상납해!!!',
+  response: '<@1271855264286638134>, 셔니에게 상납해!!!',
 };
