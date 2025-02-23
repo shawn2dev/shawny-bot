@@ -8,7 +8,7 @@ import {
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
-import { AWW_COMMAND, INVITE_COMMAND } from './commands.js';
+import { AWW_COMMAND, INVITE_COMMAND, SHAWNY_COMMAND, DABIN_COMMAND } from './commands.js';
 import { getCuteUrl } from './reddit.js';
 import { InteractionResponseFlags } from 'discord-interactions';
 
@@ -55,15 +55,6 @@ router.post('/', async (request, env) => {
     });
   }
   
-  if (interaction.type === InteractionType.MESSAGE_COMPONENT) {
-    return new JsonResponse({
-      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: {
-        content: interaction,
-      },
-    });
-  }
-
   if (interaction.type === InteractionType.APPLICATION_COMMAND) {
     // Most user commands will come as `APPLICATION_COMMAND`.
     switch (interaction.data.name.toLowerCase()) {
@@ -84,6 +75,22 @@ router.post('/', async (request, env) => {
           data: {
             content: INVITE_URL,
             flags: InteractionResponseFlags.EPHEMERAL,
+          },
+        });
+      }
+      case SHAWNY_COMMAND.name.toLowerCase(): {
+        return new JsonResponse({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: SHAWNY_COMMAND.response,
+          },
+        });
+      }
+      case DABIN_COMMAND.name.toLowerCase(): {
+        return new JsonResponse({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: DABIN_COMMAND.response,
           },
         });
       }
