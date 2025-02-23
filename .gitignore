@@ -1,9 +1,4 @@
-.hlx/*
-.aem/*
+node_modules
 coverage
-logs/*
-*node_modules
-.DS_Store
-.idea
-.iml
-.env
+.dev.vars
+.wrangler
