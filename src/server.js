@@ -68,7 +68,8 @@ router.post('/', async (request, env) => {
         });
       }
       case SEX_COMMAND.name.toLowerCase(): {
-        const sexyUrl = await getContentUrl('https://www.reddit.com/r/KoreanSexy/hot.json');
+        const reddits =['HotAsianGifs', 'KoreanSexy'];
+        const sexyUrl = await getContentUrl(`https://www.reddit.com/r/${reddits[Math.floor(Math.random() * reddits.length)]}/hot.json`);
         return new JsonResponse({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
