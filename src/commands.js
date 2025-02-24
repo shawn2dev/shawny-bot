@@ -5,7 +5,12 @@
 
 export const AWW_COMMAND = {
   name: 'awwww',
-  description: 'Drop some cuteness on this channel.',
+  description: '귀여운 것 보여줄게',
+};
+
+export const SEX_COMMAND = {
+  name: '섹스',
+  description: '야한거 볼래?',
 };
 
 export const INVITE_COMMAND = {

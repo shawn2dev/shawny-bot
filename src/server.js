@@ -8,8 +8,8 @@ import {
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
-import { AWW_COMMAND, INVITE_COMMAND, SHAWNY_COMMAND, DABIN_COMMAND } from './commands.js';
-import { getCuteUrl } from './reddit.js';
+import { AWW_COMMAND, SEX_COMMAND, INVITE_COMMAND, SHAWNY_COMMAND, DABIN_COMMAND } from './commands.js';
+import { getContentUrl } from './reddit.js';
 import { InteractionResponseFlags } from 'discord-interactions';
 
 class JsonResponse extends Response {
@@ -59,11 +59,20 @@ router.post('/', async (request, env) => {
     // Most user commands will come as `APPLICATION_COMMAND`.
     switch (interaction.data.name.toLowerCase()) {
       case AWW_COMMAND.name.toLowerCase(): {
-        const cuteUrl = await getCuteUrl();
+        const cuteUrl = await getContentUrl('https://www.reddit.com/r/aww/hot.json');
         return new JsonResponse({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
             content: cuteUrl,
+          },
+        });
+      }
+      case SEX_COMMAND.name.toLowerCase(): {
+        const sexyUrl = await getContentUrl('https://www.reddit.com/r/KoreanSexy/hot.json');
+        return new JsonResponse({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: sexyUrl,
           },
         });
       }

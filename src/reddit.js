@@ -1,13 +1,13 @@
 /**
  * Reach out to the reddit API, and get the first page of results from
- * r/aww. Filter out posts without readily available images or videos,
+ * given json. Filter out posts without readily available images or videos,
  * and return a random result.
- * @returns The url of an image or video which is cute.
+ * @returns The url of an image or video
  */
-export async function getCuteUrl() {
-  const response = await fetch(redditUrl, {
+export async function getContentUrl(json) {
+  const response = await fetch(json, {
     headers: {
-      'User-Agent': 'justinbeckwith:awwbot:v1.0.0 (by /u/justinblat)',
+      'User-Agent': 'Over_Understanding69:shawnybot:v1.0.0 (by /u/Over_Understanding69)',
     },
   });
   if (!response.ok) {
