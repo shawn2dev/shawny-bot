@@ -28,17 +28,11 @@ export async function getContentUrl(json) {
       if (post.is_gallery) {
         return '';
       }
-      let contentUrl = post.data?.media?.reddit_video?.fallback_url ||
-      post.data?.secure_media?.reddit_video?.fallback_url ||
-      post.data?.url;
-      let postId = '';
-      if (contentUrl.includes('mp4')) {
-        postId = contentUrl.split('/').at(-2);
-        audioURL = `https://v.redd.it/${postId}/DASH_AUDIO_128.mp4`;
-        contentUrl = `https://sd.rapidsave.com/download.php?permalink=https://reddit.com//&video_url=${contentUrl}&audio_url=${audioURL}`;
-      }
-      return 'https://sd.rapidsave.com/download.php?permalink=https://reddit.com//&video_url=https://v.redd.it/ko9xj0cxkwke1/DASH_720.mp4?source=fallback&audio_url=https://v.redd.it/ko9xj0cxkwke1/DASH_AUDIO_128.mp4';
-      // return contentUrl;
+      return (
+        post.data?.media?.reddit_video?.fallback_url ||
+        post.data?.secure_media?.reddit_video?.fallback_url ||
+        post.data?.url
+      );
     })
     .filter((post) => !!post);
   const randomIndex = Math.floor(Math.random() * posts.length);
