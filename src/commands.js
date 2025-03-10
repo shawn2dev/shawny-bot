@@ -29,3 +29,8 @@ export const DABIN_COMMAND = {
   description: '다빈이가 해야하는 것',
   response: '<@1271855264286638134>, 셔니에게 상납해!!!',
 };
+
+export const DDAY_COMMAND = {
+  name: '디데이',
+  description: '오늘은 며칠째?'
+}

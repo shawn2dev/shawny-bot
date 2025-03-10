@@ -11,6 +11,7 @@ import {
 import { AWW_COMMAND, SEX_COMMAND, INVITE_COMMAND, SHAWNY_COMMAND, DABIN_COMMAND } from './commands.js';
 import { getContentUrl } from './reddit.js';
 import { InteractionResponseFlags } from 'discord-interactions';
+import { daysSinceTargetDate } from './utils.js';
 
 class JsonResponse extends Response {
   constructor(body, init) {
@@ -103,6 +104,9 @@ router.post('/', async (request, env) => {
             content: DABIN_COMMAND.response,
           },
         });
+      }
+      case DDAY_COMMAND.name.toLowerCase(): {
+        return daysSinceTargetDate('2024-12-24', 'Asia/Seoul');
       }
       default:
         return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
