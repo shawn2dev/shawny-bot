@@ -1,21 +1,19 @@
-function getTimeZoneOffset(timezone) {
-    const dateInTimeZone = new Date().toLocaleString("en-US", { timeZone: timezone });
-    const offset = new Date(dateInTimeZone).getHours() - new Date().getHours();
-    return offset >= 0 ? `+${offset}:00` : `${offset}:00`;
-}
-
 export function daysSinceTargetDate(targetDate, timezone) {
-    // Create a Date object for the target date, considering the timezone
-    const targetDateInTimeZone = new Date(targetDate + 'T00:00:00' + getTimeZoneOffset(timezone));
+    // Parse the target date into a Date object and convert to the specified timezone.
+    const target = new Date(targetDate + "T00:00:00Z"); // Create target date in UTC
     
-    // Get the current date and time in the same timezone
-    const now = new Date(new Date().toLocaleString("en-US", { timeZone: timezone }));
+    // Get current date in the specified timezone and convert it to the same time format
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: timezone }));
     
-    // Calculate the difference in milliseconds
-    const timeDifference = now - targetDateInTimeZone;
-    
+    // Normalize both dates to midnight UTC time
+    const targetDateUTC = Date.UTC(target.getUTCFullYear(), target.getUTCMonth(), target.getUTCDate());
+    const nowDateUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  
+    // Calculate the difference in time (in milliseconds)
+    const timeDifference = nowDateUTC - targetDateUTC;
+  
     // Convert the difference from milliseconds to days
     const daysPassed = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-    
+  
     return daysPassed;
 }
