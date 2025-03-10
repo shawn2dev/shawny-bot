@@ -13,7 +13,7 @@ export function daysSinceTargetDate(targetDate, timezone) {
     const timeDifference = nowDateUTC - targetDateUTC;
   
     // Convert the difference from milliseconds to days
-    const daysPassed = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+    const daysPassed = Math.floor(timeDifference / (1000 * 60 * 60 * 24)) + 1;
   
     return daysPassed;
 }
