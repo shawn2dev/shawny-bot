@@ -8,7 +8,7 @@ import {
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
-import { AWW_COMMAND, SEX_COMMAND, INVITE_COMMAND, SHAWNY_COMMAND, DABIN_COMMAND } from './commands.js';
+import { AWW_COMMAND, SEX_COMMAND, INVITE_COMMAND, SHAWNY_COMMAND, DABIN_COMMAND, DDAY_COMMAND } from './commands.js';
 import { getContentUrl } from './reddit.js';
 import { InteractionResponseFlags } from 'discord-interactions';
 import { daysSinceTargetDate } from './utils.js';
