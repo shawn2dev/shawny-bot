@@ -106,7 +106,12 @@ router.post('/', async (request, env) => {
         });
       }
       case DDAY_COMMAND.name.toLowerCase(): {
-        return `${daysSinceTargetDate('2024-12-24', 'Asia/Seoul')}일째 ❤️`;
+        return new JsonResponse({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: `${daysSinceTargetDate('2024-12-24', 'Asia/Seoul')}일째 ❤️`,
+          },
+        });
       }
       default:
         return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
