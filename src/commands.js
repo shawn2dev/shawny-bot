@@ -13,6 +13,12 @@ export const SEX_COMMAND = {
   description: '야한거 볼래?',
 };
 
+export const SEX_OLD_COMMAND = {
+  name: '섹스old',
+  description: '야한거 볼래? (옛날버전)',
+};
+
+
 export const SHAWNY_COMMAND = {
   name: '셔니',
   description: '셔니가 해줘야하는 것',

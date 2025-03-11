@@ -8,10 +8,9 @@ import {
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
-import { AWW_COMMAND, SEX_COMMAND, SHAWNY_COMMAND, DABIN_COMMAND, DDAY_COMMAND } from './commands.js';
+import { AWW_COMMAND, SEX_COMMAND, SEX_OLD_COMMAND, SHAWNY_COMMAND, DABIN_COMMAND, DDAY_COMMAND } from './commands.js';
 import { getContentUrl } from './reddit.js';
 import { daysSinceTargetDate } from './utils.js';
-import { getVideoUrls } from './videoFromCrawler.js';
 
 class JsonResponse extends Response {
   constructor(body, init) {
@@ -69,14 +68,29 @@ router.post('/', async (request, env) => {
         });
       }
       case SEX_COMMAND.name.toLowerCase(): {
-        // const reddits =['HotAsianGifs', 'KoreanSexy', 'NSFW_GIF', 'porn'];
-        // const sexyUrl = await getContentUrl(`https://www.reddit.com/r/${reddits[Math.floor(Math.random() * reddits.length)]}/hot.json`);
-        const sexyUrls = await getVideoUrls()
+        const { keys } = await env.VIDEO_STORAGE.list();
+        const randomKey = Math.floor(Math.random() * keys.length);
+        const content = await env.VIDEO_STORAGE.get(keys[randomKey].name, 'text');
+        const regex = /https?.*mp4/g;
+        let sexyUrls = content.match(regex);
+        sexyUrls = sexyUrls[0].split(',');
         const random = Math.floor(Math.random() * sexyUrls.length);
+
         return new JsonResponse({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            content: `${sexyUrls}||${sexyUrls[random]}||`,
+            content: sexyUrls[random].trim(),
+          },
+        });
+      }
+      case SEX_OLD_COMMAND.name.toLowerCase(): {
+        const reddits =['HotAsianGifs', 'KoreanSexy', 'NSFW_GIF', 'porn'];
+        const sexyUrl = await getContentUrl(`https://www.reddit.com/r/${reddits[Math.floor(Math.random() * reddits.length)]}/hot.json`);      
+
+        return new JsonResponse({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: `||${sexyUrl}||`,
           },
         });
       }

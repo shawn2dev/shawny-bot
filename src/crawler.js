@@ -1,21 +1,29 @@
-import { FileDownload } from 'crawlee';
+import { CheerioCrawler } from 'crawlee';
 
-// Create a FileDownload - a custom crawler instance that will download files from URLs.
-const crawler = new FileDownload({
-    async requestHandler({ body, request, contentType, getKeyValueStore }) {
-        const url = new URL(request.url);
-        const kvs = await getKeyValueStore();
-
-        await kvs.setValue(url.pathname.replace(/\//g, '_'), body, { contentType: contentType.type });
+const crawler = new CheerioCrawler({
+    // Function called for each URL
+    async requestHandler({ pushData, request, body }) {
+        const regex = /https?.*mp4/g;
+        const videoUrls = [];
+        const found = body.match(regex);
+        if (found) {
+            videoUrls.push(...new Set(found));
+            await pushData({
+                vidoes: videoUrls,
+            });
+        }
     },
 });
 
-// The initial list of URLs to crawl. Here we use just a few hard-coded URLs.
 await crawler.addRequests([
     'https://www.twidouga.net/ko/ranking_t1.php',
+    'https://www.twidouga.net/ko/ranking_t2.php',
 ]);
 
-// Run the downloader and wait for it to finish.
+// Run the crawler
 await crawler.run();
 
-console.log('Crawler finished.');
+const cmd1 = 'wrangler kv:key put --namespace-id d620fc69264c4085bdf528b80014e6cc "t1" "$(cat ./storage/datasets/default/000000001.json)"';
+const cmd2 = 'wrangler kv:key put --namespace-id d620fc69264c4085bdf528b80014e6cc "t2" "$(cat ./storage/datasets/default/000000002.json)"';
+console.log(cmd1);
+console.log(cmd2);
