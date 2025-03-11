@@ -8,10 +8,10 @@ import {
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
-import { AWW_COMMAND, SEX_COMMAND, INVITE_COMMAND, SHAWNY_COMMAND, DABIN_COMMAND, DDAY_COMMAND } from './commands.js';
+import { AWW_COMMAND, SEX_COMMAND, SHAWNY_COMMAND, DABIN_COMMAND, DDAY_COMMAND } from './commands.js';
 import { getContentUrl } from './reddit.js';
-import { InteractionResponseFlags } from 'discord-interactions';
 import { daysSinceTargetDate } from './utils.js';
+import { getVideoUrls } from './videoFromCrawler.js';
 
 class JsonResponse extends Response {
   constructor(body, init) {
@@ -69,23 +69,14 @@ router.post('/', async (request, env) => {
         });
       }
       case SEX_COMMAND.name.toLowerCase(): {
-        const reddits =['HotAsianGifs', 'KoreanSexy', 'NSFW_GIF', 'porn'];
-        const sexyUrl = await getContentUrl(`https://www.reddit.com/r/${reddits[Math.floor(Math.random() * reddits.length)]}/hot.json`);
+        // const reddits =['HotAsianGifs', 'KoreanSexy', 'NSFW_GIF', 'porn'];
+        // const sexyUrl = await getContentUrl(`https://www.reddit.com/r/${reddits[Math.floor(Math.random() * reddits.length)]}/hot.json`);
+        const sexyUrls = await getVideoUrls()
+        const random = Math.floor(Math.random() * sexyUrls.length);
         return new JsonResponse({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            content: `||${sexyUrl}||`,
-          },
-        });
-      }
-      case INVITE_COMMAND.name.toLowerCase(): {
-        const applicationId = env.DISCORD_APPLICATION_ID;
-        const INVITE_URL = `https://discord.com/oauth2/authorize?client_id=${applicationId}&permissions=8&integration_type=0&scope=bot+applications.commands`;
-        return new JsonResponse({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: INVITE_URL,
-            flags: InteractionResponseFlags.EPHEMERAL,
+            content: `||${sexyUrls[random]}||`,
           },
         });
       }

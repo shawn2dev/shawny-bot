@@ -13,11 +13,6 @@ export const SEX_COMMAND = {
   description: '야한거 볼래?',
 };
 
-export const INVITE_COMMAND = {
-  name: 'invite',
-  description: 'Get an invite link to add the bot to your server',
-};
-
 export const SHAWNY_COMMAND = {
   name: '셔니',
   description: '셔니가 해줘야하는 것',

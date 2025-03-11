@@ -1,6 +1,7 @@
 name = "shawnybot"
 main = "./src/server.js"
 compatibility_date="2025-02-22"
+node_compat = true
 
 # [secrets]
 # DISCORD_TOKEN
