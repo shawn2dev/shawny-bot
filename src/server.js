@@ -78,7 +78,7 @@ router.post('/', async (request, env) => {
         return new JsonResponse({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            content: `${daysSinceTargetDate('2025-01-08', 'Asia/Seoul')}일째 ❤️`,
+            content: `${daysSinceTargetDate('2026-01-08', 'Asia/Seoul')}일째 ❤️`,
           },
         });
       }
