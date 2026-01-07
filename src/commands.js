@@ -15,7 +15,7 @@ export const SEO_COMMAND = {
   response: '<@1419241440118050858>, 셔니에게 상납해!!!',
 };
 
-export const DDAY_COMMAND = {
+export const D_DAY_COMMAND = {
   name: '디데이',
   description: '오늘은 며칠째?'
 }

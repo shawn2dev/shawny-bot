@@ -8,7 +8,7 @@ import {
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
-import { SHAWNY_COMMAND, SEO_COMMAND, DDAY_COMMAND } from './commands.js';
+import { SHAWNY_COMMAND, SEO_COMMAND, D_DAY_COMMAND } from './commands.js';
 import { getContentUrl } from './reddit.js';
 import { daysSinceTargetDate } from './utils.js';
 
@@ -74,7 +74,7 @@ router.post('/', async (request, env) => {
           },
         });
       }
-      case DDAY_COMMAND.name.toLowerCase(): {
+      case D_DAY_COMMAND.name.toLowerCase(): {
         return new JsonResponse({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
