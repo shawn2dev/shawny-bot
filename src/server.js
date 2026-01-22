@@ -8,9 +8,9 @@ import {
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
-import { SHAWNY_COMMAND, SEO_COMMAND, D_DAY_COMMAND } from './commands.js';
+import { SHAWNY_COMMAND, SEO_COMMAND, D_DAY_COMMAND, YA_COMMAND } from './commands.js';
 import { getContentUrl } from './reddit.js';
-import { daysSinceTargetDate } from './utils.js';
+import { daysSinceTargetDate, getRandomMp4 } from './utils.js';
 
 class JsonResponse extends Response {
   constructor(body, init) {
@@ -79,6 +79,14 @@ router.post('/', async (request, env) => {
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
             content: `${daysSinceTargetDate('2026-01-08', 'Asia/Seoul')}일째 ❤️`,
+          },
+        });
+      }
+      case YA_COMMAND.name.toLowerCase(): {
+        return new JsonResponse({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: await `||${getRandomMp4('https://www.twidouga.net/ko/ranking_t1.php')}||`,
           },
         });
       }

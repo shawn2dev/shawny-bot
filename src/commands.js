@@ -19,3 +19,8 @@ export const D_DAY_COMMAND = {
   name: '디데이',
   description: '오늘은 며칠째?'
 }
+
+export const YA_COMMAND = {
+  name: '야동',
+  description: '야한거 볼래?'
+}
