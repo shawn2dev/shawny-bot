@@ -83,10 +83,13 @@ router.post('/', async (request, env) => {
         });
       }
       case YA_COMMAND.name.toLowerCase(): {
+        const yaUrls = ['https://www.twidouga.net/ko/ranking_t1.php', 'https://www.twidouga.net/ko/ranking_t2.php'];
+        const randomIndex = Math.floor(Math.random() * yaUrls.length);
+        const randomMp4Url = await getRandomMp4(yaUrls[randomIndex]);
         return new JsonResponse({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            content: await `||${getRandomMp4('https://www.twidouga.net/ko/ranking_t1.php')}||`,
+            content: randomMp4Url,
           },
         });
       }

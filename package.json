@@ -18,6 +18,7 @@
   "author": "Shawn",
   "license": "MIT",
   "dependencies": {
+    "axios": "^1.13.2",
     "cheerio": "^1.1.2",
     "crawlee": "^3.13.0",
     "discord-interactions": "^4.0.0",
@@ -38,6 +39,6 @@
     "ngrok": "^5.0.0-beta.2",
     "prettier": "^3.2.5",
     "sinon": "^19.0.2",
-    "wrangler": "^3.0.1"
+    "wrangler": "^4.59.3"
   }
 }
