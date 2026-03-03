@@ -3,16 +3,13 @@ main = "./src/server.js"
 compatibility_flags = [ "nodejs_compat" ]
 compatibility_date="2025-02-22"
 
-
-[vars]
-OWNER_ID = "851312069915574332"
-
 [[kv_namespaces]]
 binding = "ALLOWED_USERS"
 id = "d620fc69264c4085bdf528b80014e6cc"
 
-# [secrets]
+# Set via: wrangler secret put <NAME>
 # DISCORD_TOKEN
 # DISCORD_PUBLIC_KEY
 # DISCORD_APPLICATION_ID
+# OWNER_ID
 
