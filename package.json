@@ -12,7 +12,8 @@
     "fix": "eslint --fix '**/*.js'",
     "lint": "eslint '**/*.js'",
     "register": "node src/register.js",
-    "publish": "wrangler deploy"
+    "publish": "wrangler deploy",
+    "owner": "wrangler secret put OWNER_ID"
   },
   "keywords": [],
   "author": "Shawn",

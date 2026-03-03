@@ -1,4 +1,4 @@
-import { SEO_COMMAND, SHAWNY_COMMAND, D_DAY_COMMAND, YA_COMMAND } from './commands.js';
+import { SEO_COMMAND, SHAWNY_COMMAND, D_DAY_COMMAND, YA_COMMAND, APPROVE_COMMAND, BLOCK_COMMAND } from './commands.js';
 import dotenv from 'dotenv';
 import process from 'node:process';
 
@@ -34,7 +34,7 @@ const response = await fetch(url, {
     Authorization: `Bot ${token}`,
   },
   method: 'PUT',
-  body: JSON.stringify([SHAWNY_COMMAND, SEO_COMMAND, D_DAY_COMMAND, YA_COMMAND]),
+  body: JSON.stringify([SHAWNY_COMMAND, SEO_COMMAND, D_DAY_COMMAND, YA_COMMAND, APPROVE_COMMAND, BLOCK_COMMAND]),
 });
 
 if (response.ok) {
