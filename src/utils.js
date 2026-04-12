@@ -20,14 +20,20 @@ export function daysSinceTargetDate(targetDate, timezone) {
     return daysPassed;
 }
 
-export async function getRandomMp4(url) {
-    const response = await fetch(url, {
-        headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-            'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-            'Referer': 'https://www.twidouga.net/',
-        }
+const BROWSER_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Referer': 'https://www.twidouga.net/',
+};
+
+export async function getRandomMp4(url, options = {}) {
+    const { scraperApiKey } = options;
+    const fetchUrl = scraperApiKey
+        ? `https://api.scraperapi.com?api_key=${scraperApiKey}&url=${encodeURIComponent(url)}`
+        : url;
+    const response = await fetch(fetchUrl, {
+        headers: scraperApiKey ? {} : BROWSER_HEADERS,
     });
     
     if (!response.ok) {

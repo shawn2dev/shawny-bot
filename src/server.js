@@ -8,7 +8,7 @@ import {
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
-import { SHAWNY_COMMAND, SEO_COMMAND, D_DAY_COMMAND, YA_COMMAND, APPROVE_COMMAND, BLOCK_COMMAND } from './commands.js';
+import { SHAWNY_COMMAND, SEO_COMMAND, D_DAY_COMMAND, YA_COMMAND, APPROVE_COMMAND, BLOCK_COMMAND, EMOJI_COMMAND } from './commands.js';
 import { getContentUrl } from './reddit.js';
 import { daysSinceTargetDate, getRandomMp4 } from './utils.js';
 
@@ -64,7 +64,7 @@ router.get('/', (request, env) => {
  * include a JSON payload described here:
  * https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object
  */
-router.post('/', async (request, env) => {
+router.post('/', async (request, env, ctx) => {
   const { isValid, interaction } = await server.verifyDiscordRequest(
     request,
     env,
@@ -119,9 +119,40 @@ router.post('/', async (request, env) => {
         await blockUser(targetUserId, env);
         return new JsonResponse({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: { content: `<@${targetUserId}> 차단됨` },
+          data: { content: `<@${targetUserId}> 제거됨` },
         });
       }
+    }
+
+    // Public: 이모지확대 (no whitelist)
+    if (commandName === EMOJI_COMMAND.name.toLowerCase()) {
+      const options = interaction.data.options ?? [];
+      const emojiMessage = options.find((o) => o.name === 'emoji_message')?.value;
+      if (!emojiMessage || typeof emojiMessage !== 'string') {
+        return new JsonResponse({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: { content: '이모지를 입력해 주세요.', flags: 64 },
+        });
+      }
+      // Discord custom emoji format: <:name:id> or <a:name:id> (animated)
+      const match = emojiMessage.match(/<a?:(\w+):(\d+)>/);
+      if (!match) {
+        return new JsonResponse({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: '커스텀 이모지 형식이 아닙니다. `<:이름:숫자>` 형태로 서버 이모지를 붙여넣어 주세요.',
+            flags: 64,
+          },
+        });
+      }
+      const emojiId = match[2];
+      const isAnimated = emojiMessage.startsWith('<a:');
+      const ext = isAnimated ? 'gif' : 'png';
+      const cdnUrl = `https://cdn.discordapp.com/emojis/${emojiId}.${ext}`;
+      return new JsonResponse({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: { content: cdnUrl },
+      });
     }
 
     // All other commands: require whitelist
@@ -160,26 +191,35 @@ router.post('/', async (request, env) => {
         });
       }
       case YA_COMMAND.name.toLowerCase(): {
-        try {
-          const yaUrls = ['https://www.twidouga.net/ko/ranking_t1.php', 'https://www.twidouga.net/ko/ranking_t2.php'];
-          const randomIndex = Math.floor(Math.random() * yaUrls.length);
-          const randomMp4Url = await getRandomMp4(yaUrls[randomIndex]);
-          return new JsonResponse({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
+        const yaUrls = [
+          'https://www.twidouga.net/ko/ranking_t1.php',
+          'https://www.twidouga.net/ko/ranking_t2.php',
+        ];
+        const finishYa = (async () => {
+          try {
+            const randomIndex = Math.floor(Math.random() * yaUrls.length);
+            const randomMp4Url = await getRandomMp4(yaUrls[randomIndex], {
+              scraperApiKey: env.SCRAPER_API_KEY,
+            });
+            await patchDiscordInteractionOriginal(env, interaction, {
               content: randomMp4Url,
-            },
-          });
-        } catch (err) {
-          console.error('YA_COMMAND getRandomMp4 failed:', err);
-          return new JsonResponse({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
+            });
+          } catch (err) {
+            console.error('YA_COMMAND getRandomMp4 failed:', err);
+            await patchDiscordInteractionOriginal(env, interaction, {
               content: `오류가 났어요. 나중에 다시 시도해 주세요. (${err?.message ?? String(err)})`,
               flags: 64,
-            },
-          });
+            });
+          }
+        })();
+        if (ctx?.waitUntil) {
+          ctx.waitUntil(finishYa);
+        } else {
+          void finishYa.catch((e) => console.error('YA_COMMAND background:', e));
         }
+        return new JsonResponse({
+          type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
+        });
       }
       default:
         return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
@@ -204,6 +244,23 @@ async function verifyDiscordRequest(request, env) {
   }
 
   return { interaction: JSON.parse(body), isValid: true };
+}
+
+/** Edit the message for a deferred interaction (slash commands have ~3s to ack). */
+async function patchDiscordInteractionOriginal(env, interaction, data) {
+  const applicationId = interaction.application_id ?? env.DISCORD_APPLICATION_ID;
+  const url = `https://discord.com/api/v10/webhooks/${applicationId}/${interaction.token}/messages/@original`;
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8',
+      Authorization: `Bot ${env.DISCORD_TOKEN}`,
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    console.error('Discord interaction PATCH failed:', res.status, await res.text());
+  }
 }
 
 const server = {
