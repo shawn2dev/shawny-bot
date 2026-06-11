@@ -8,9 +8,9 @@ import {
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
-import { SHAWNY_COMMAND, SEO_COMMAND, D_DAY_COMMAND, YA_COMMAND, APPROVE_COMMAND, BLOCK_COMMAND, EMOJI_COMMAND } from './commands.js';
+import { YA_COMMAND, APPROVE_COMMAND, BLOCK_COMMAND, EMOJI_COMMAND } from './commands.js';
 import { getContentUrl } from './reddit.js';
-import { daysSinceTargetDate, getRandomMp4 } from './utils.js';
+import { getRandomMp4 } from './utils.js';
 
 class JsonResponse extends Response {
   constructor(body, init) {
@@ -166,30 +166,6 @@ router.post('/', async (request, env, ctx) => {
 
     // Whitelisted user commands
     switch (commandName) {
-      case SHAWNY_COMMAND.name.toLowerCase(): {
-        return new JsonResponse({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: SHAWNY_COMMAND.response,
-          },
-        });
-      }
-      case SEO_COMMAND.name.toLowerCase(): {
-        return new JsonResponse({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: SEO_COMMAND.response,
-          },
-        });
-      }
-      case D_DAY_COMMAND.name.toLowerCase(): {
-        return new JsonResponse({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: `${daysSinceTargetDate('2026-01-08', 'Asia/Seoul')}일째 ❤️`,
-          },
-        });
-      }
       case YA_COMMAND.name.toLowerCase(): {
         const yaUrls = [
           'https://www.twidouga.net/ko/ranking_t1.php',
