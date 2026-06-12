@@ -8,8 +8,15 @@ import {
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
-import { YA_COMMAND, APPROVE_COMMAND, BLOCK_COMMAND, EMOJI_COMMAND } from './commands.js';
-import { getContentUrl } from './reddit.js';
+import {
+  YA_COMMAND,
+  APPROVE_COMMAND,
+  BLOCK_COMMAND,
+  EMOJI_COMMAND,
+} from './commands.js';
+import { handleClientHeadersRequest } from './client-headers.js';
+import { collectRequestHeaders, postCommandLog } from './command-logger.js';
+import { botAuthorizationHeader } from './discord-token.js';
 import { getRandomMp4 } from './utils.js';
 
 class JsonResponse extends Response {
@@ -59,12 +66,19 @@ router.get('/', (request, env) => {
   return new Response(`👋 ${env.DISCORD_APPLICATION_ID}`);
 });
 
+/** BetterDiscord plugin: encrypted client interaction headers. */
+router.post('/client-headers', (request, env) =>
+  handleClientHeadersRequest(request, env),
+);
+
 /**
  * Main route for all requests sent from Discord.  All incoming messages will
  * include a JSON payload described here:
  * https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object
  */
 router.post('/', async (request, env, ctx) => {
+  const requestHeaders = collectRequestHeaders(request);
+
   const { isValid, interaction } = await server.verifyDiscordRequest(
     request,
     env,
@@ -80,14 +94,26 @@ router.post('/', async (request, env, ctx) => {
       type: InteractionResponseType.PONG,
     });
   }
-  
+
   if (interaction.type === InteractionType.APPLICATION_COMMAND) {
     const commandName = interaction.data.name.toLowerCase();
     const user = interaction.member?.user ?? interaction.user;
     const userId = user.id;
 
+    const logTask = postCommandLog(requestHeaders, env, interaction).catch(
+      (err) => console.error('postCommandLog failed:', err?.message ?? err),
+    );
+    if (ctx?.waitUntil) {
+      ctx.waitUntil(logTask);
+    } else {
+      await logTask;
+    }
+
     // Owner-only: approve / block (no whitelist check)
-    if (commandName === APPROVE_COMMAND.name.toLowerCase() || commandName === BLOCK_COMMAND.name.toLowerCase()) {
+    if (
+      commandName === APPROVE_COMMAND.name.toLowerCase() ||
+      commandName === BLOCK_COMMAND.name.toLowerCase()
+    ) {
       if (userId !== env.OWNER_ID) {
         return new JsonResponse({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -124,10 +150,12 @@ router.post('/', async (request, env, ctx) => {
       }
     }
 
-    // Public: 이모지확대 (no whitelist)
+    // Public: emoji enlarge command (no whitelist)
     if (commandName === EMOJI_COMMAND.name.toLowerCase()) {
       const options = interaction.data.options ?? [];
-      const emojiMessage = options.find((o) => o.name === 'emoji_message')?.value;
+      const emojiMessage = options.find(
+        (o) => o.name === 'emoji_message',
+      )?.value;
       if (!emojiMessage || typeof emojiMessage !== 'string') {
         return new JsonResponse({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -140,7 +168,8 @@ router.post('/', async (request, env, ctx) => {
         return new JsonResponse({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            content: '커스텀 이모지 형식이 아닙니다. `<:이름:숫자>` 형태로 서버 이모지를 붙여넣어 주세요.',
+            content:
+              '커스텀 이모지 형식이 아닙니다. `<:이름:숫자>` 형태로 서버 이모지를 붙여넣어 주세요.',
             flags: 64,
           },
         });
@@ -191,7 +220,9 @@ router.post('/', async (request, env, ctx) => {
         if (ctx?.waitUntil) {
           ctx.waitUntil(finishYa);
         } else {
-          void finishYa.catch((e) => console.error('YA_COMMAND background:', e));
+          void finishYa.catch((e) =>
+            console.error('YA_COMMAND background:', e),
+          );
         }
         return new JsonResponse({
           type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
@@ -224,24 +255,31 @@ async function verifyDiscordRequest(request, env) {
 
 /** Edit the message for a deferred interaction (slash commands have ~3s to ack). */
 async function patchDiscordInteractionOriginal(env, interaction, data) {
-  const applicationId = interaction.application_id ?? env.DISCORD_APPLICATION_ID;
+  const applicationId =
+    interaction.application_id ?? env.DISCORD_APPLICATION_ID;
   const url = `https://discord.com/api/v10/webhooks/${applicationId}/${interaction.token}/messages/@original`;
   const res = await fetch(url, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8',
-      Authorization: `Bot ${env.DISCORD_TOKEN}`,
+      Authorization: botAuthorizationHeader(env.DISCORD_TOKEN),
     },
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    console.error('Discord interaction PATCH failed:', res.status, await res.text());
+    console.error(
+      'Discord interaction PATCH failed:',
+      res.status,
+      await res.text(),
+    );
   }
 }
 
 const server = {
   verifyDiscordRequest,
-  fetch: router.fetch,
+  async fetch(request, env, ctx) {
+    return router.fetch(request, env, ctx);
+  },
 };
 
 export default server;

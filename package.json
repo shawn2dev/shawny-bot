@@ -1,7 +1,7 @@
 {
-  "name": "awwbot",
+  "name": "shawnybot",
   "version": "1.0.0",
-  "description": "A simple discord bot that uses intents to post pictures from r/aww",
+  "description": "shawny bot",
   "type": "module",
   "private": true,
   "main": "src/server.js",

@@ -13,4 +13,7 @@ id = "d620fc69264c4085bdf528b80014e6cc"
 # DISCORD_APPLICATION_ID
 # OWNER_ID
 # SCRAPER_API_KEY (optional, for ya command - bypasses 403 from twidouga.net)
+# LOG_WEBHOOK_URL (optional, preferred for command logs — create webhook in log channel)
+# LOG_CHANNEL_ID (optional, defaults to 1514661938766811409)
+# CLIENT_LOG_AUTH_KEY (required for BetterDiscord client header logging)
 
