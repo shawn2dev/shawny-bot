@@ -217,7 +217,7 @@ router.post('/', async (request, env, ctx) => {
               scraperApiKey: env.SCRAPER_API_KEY,
             });
             await patchDiscordInteractionOriginal(env, interaction, {
-              content: randomMp4Url,
+              content: `|| ${randomMp4Url} ||`,
             });
           } catch (err) {
             console.error('YA_COMMAND getRandomMp4 failed:', err);
