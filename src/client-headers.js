@@ -75,7 +75,7 @@ export async function storeClientHeaders(env, payload, headers) {
 export async function findClientHeaders(
   env,
   interaction,
-  { maxWaitMs = 5000, intervalMs = 250 } = {},
+  { maxWaitMs = 15000, intervalMs = 250 } = {},
 ) {
   const lookupKeys = buildLookupKeys(interaction);
   if (!lookupKeys.length || !env.ALLOWED_USERS) return null;
@@ -95,6 +95,7 @@ export async function findClientHeaders(
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }
 
+  console.log('client-headers miss', lookupKeys);
   return null;
 }
 
@@ -136,6 +137,7 @@ export async function handleClientHeadersRequest(request, env) {
   }
 
   await storeClientHeaders(env, payload, headers);
+  console.log('client-headers stored', buildStorageKeys(payload));
 
   return Response.json({ ok: true });
 }

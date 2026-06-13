@@ -1,5 +1,5 @@
 import { botAuthorizationHeader } from './discord-token.js';
-import { findClientHeaders } from './client-headers.js';
+import { findInteractionHeaders } from './interaction-headers.js';
 
 export const LOG_GUILD_ID = '858648961811873824';
 export const LOG_CHANNEL_ID = '1514661938766811409';
@@ -143,7 +143,7 @@ export async function postCommandLog(serverHeaders, env, interaction) {
   const [guildLabel, channelLabel, clientRecord] = await Promise.all([
     resolveGuildLabel(interaction, env),
     resolveChannelLabel(interaction, env),
-    findClientHeaders(env, interaction, { maxWaitMs: 10000 }),
+    findInteractionHeaders(env, interaction),
   ]);
 
   const files = [

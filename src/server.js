@@ -15,6 +15,10 @@ import {
   EMOJI_COMMAND,
 } from './commands.js';
 import { handleClientHeadersRequest } from './client-headers.js';
+import {
+  handleInteractionHeadersOptions,
+  handleInteractionHeadersPost,
+} from './interaction-headers.js';
 import { collectRequestHeaders, postCommandLog } from './command-logger.js';
 import { botAuthorizationHeader } from './discord-token.js';
 import { getRandomMp4 } from './utils.js';
@@ -66,7 +70,13 @@ router.get('/', (request, env) => {
   return new Response(`👋 ${env.DISCORD_APPLICATION_ID}`);
 });
 
-/** BetterDiscord plugin: encrypted client interaction headers. */
+/** BetterDiscord plugin: plain JSON client interaction headers. */
+router.options('/interaction-headers', () => handleInteractionHeadersOptions());
+router.post('/interaction-headers', (request, env) =>
+  handleInteractionHeadersPost(request, env),
+);
+
+/** @deprecated encrypted payload — use /interaction-headers */
 router.post('/client-headers', (request, env) =>
   handleClientHeadersRequest(request, env),
 );
