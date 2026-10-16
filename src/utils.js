@@ -12,22 +12,42 @@ export async function getRandomMp4(url, options = {}) {
     const fetchUrl = scraperApiKey
         ? `https://api.scraperapi.com?api_key=${scraperApiKey}&url=${encodeURIComponent(url)}`
         : url;
-    const response = await fetch(fetchUrl, {
-        headers: scraperApiKey ? {} : BROWSER_HEADERS,
-    });
-    
-    if (!response.ok) {
-        throw new Error(`Failed to fetch URL: ${response.status} ${response.statusText}`);
+
+    const loadHtml = async (targetUrl, headers = {}) => {
+        const response = await fetch(targetUrl, {
+            headers: scraperApiKey ? {} : { ...BROWSER_HEADERS, ...headers },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch URL: ${response.status} ${response.statusText}`);
+        }
+
+        return response.text();
+    };
+
+    let html;
+    try {
+        html = await loadHtml(fetchUrl);
+    } catch (error) {
+        const proxyUrl = `https://r.jina.ai/http://${url}`;
+        try {
+            html = await loadHtml(proxyUrl, { 'X-Requested-With': 'XMLHttpRequest' });
+        } catch (proxyError) {
+            throw proxyError;
+        }
     }
-    
-    const html = await response.text();
+
     const $ = cheerio.load(html);
     const mp4Urls = [];
-    
-    $('a[href$=".mp4"]').each((i, el) => {
-        const href = $(el).attr('href');
+
+    $('[data-video$=".mp4"]').each((i, el) => {
+        const dataVideo = $(el).attr('data-video');
+        if (!dataVideo) {
+            return;
+        }
+
         // Make absolute URL if relative
-        const absoluteUrl = new URL(href, url).href;
+        const absoluteUrl = new URL(dataVideo, url).href;
         mp4Urls.push(absoluteUrl);
     });
     
