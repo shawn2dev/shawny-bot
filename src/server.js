@@ -5,6 +5,7 @@
 import { AutoRouter } from 'itty-router';
 import {
   InteractionResponseType,
+  InteractionResponseFlags,
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
@@ -127,7 +128,10 @@ router.post('/', async (request, env, ctx) => {
       if (userId !== env.OWNER_ID) {
         return new JsonResponse({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: { content: '권한 없음', flags: 64 },
+          data: {
+            content: '권한 없음',
+            flags: InteractionResponseFlags.EPHEMERAL,
+          },
         });
       }
       if (commandName === APPROVE_COMMAND.name.toLowerCase()) {
@@ -135,13 +139,19 @@ router.post('/', async (request, env, ctx) => {
         if (!targetUserId) {
           return new JsonResponse({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: { content: '대상 유저를 선택해 주세요.', flags: 64 },
+            data: {
+              content: '대상 유저를 선택해 주세요.',
+              flags: InteractionResponseFlags.EPHEMERAL,
+            },
           });
         }
         await approveUser(targetUserId, env);
         return new JsonResponse({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: { content: `<@${targetUserId}> 승인됨` },
+          data: {
+            content: `<@${targetUserId}> 승인됨`,
+            flags: InteractionResponseFlags.EPHEMERAL,
+          },
         });
       }
       if (commandName === BLOCK_COMMAND.name.toLowerCase()) {
@@ -149,13 +159,19 @@ router.post('/', async (request, env, ctx) => {
         if (!targetUserId) {
           return new JsonResponse({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: { content: '대상 유저를 선택해 주세요.', flags: 64 },
+            data: {
+              content: '대상 유저를 선택해 주세요.',
+              flags: InteractionResponseFlags.EPHEMERAL,
+            },
           });
         }
         await blockUser(targetUserId, env);
         return new JsonResponse({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: { content: `<@${targetUserId}> 제거됨` },
+          data: {
+            content: `<@${targetUserId}> 제거됨`,
+            flags: InteractionResponseFlags.EPHEMERAL,
+          },
         });
       }
     }
@@ -169,7 +185,10 @@ router.post('/', async (request, env, ctx) => {
       if (!emojiMessage || typeof emojiMessage !== 'string') {
         return new JsonResponse({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: { content: '이모지를 입력해 주세요.', flags: 64 },
+          data: {
+            content: '이모지를 입력해 주세요.',
+            flags: InteractionResponseFlags.EPHEMERAL,
+          },
         });
       }
       // Discord custom emoji format: <:name:id> or <a:name:id> (animated)
@@ -180,7 +199,7 @@ router.post('/', async (request, env, ctx) => {
           data: {
             content:
               '커스텀 이모지 형식이 아닙니다. `<:이름:숫자>` 형태로 서버 이모지를 붙여넣어 주세요.',
-            flags: 64,
+            flags: InteractionResponseFlags.EPHEMERAL,
           },
         });
       }
@@ -199,7 +218,10 @@ router.post('/', async (request, env, ctx) => {
     if (!allowed) {
       return new JsonResponse({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: { content: '사용 권한 없음' },
+        data: {
+          content: '사용 권한 없음',
+          flags: InteractionResponseFlags.EPHEMERAL,
+        },
       });
     }
 
@@ -220,10 +242,16 @@ router.post('/', async (request, env, ctx) => {
               content: `|| ${randomMp4Url} ||`,
             });
           } catch (err) {
-            console.error('YA_COMMAND getRandomMp4 failed:', err);
-            await patchDiscordInteractionOriginal(env, interaction, {
+            console.error('YA_COMMAND failed:', {
+              name: err?.name,
+              message: err?.message ?? String(err),
+              details: err?.details,
+              stack: err?.stack,
+            });
+            await deleteDiscordInteractionOriginal(env, interaction);
+            await postDiscordInteractionFollowup(env, interaction, {
               content: `오류가 났어요. 나중에 다시 시도해 주세요. (${err?.message ?? String(err)})`,
-              flags: 64,
+              flags: InteractionResponseFlags.EPHEMERAL,
             });
           }
         })();
@@ -277,10 +305,62 @@ async function patchDiscordInteractionOriginal(env, interaction, data) {
     body: JSON.stringify(data),
   });
   if (!res.ok) {
+    const responseBody = await res.text();
     console.error(
       'Discord interaction PATCH failed:',
-      res.status,
-      await res.text(),
+      JSON.stringify({
+        status: res.status,
+        statusText: res.statusText,
+        responseBody: responseBody.slice(0, 1000),
+      }),
+    );
+  }
+}
+
+async function deleteDiscordInteractionOriginal(env, interaction) {
+  const applicationId =
+    interaction.application_id ?? env.DISCORD_APPLICATION_ID;
+  const url = `https://discord.com/api/v10/webhooks/${applicationId}/${interaction.token}/messages/@original`;
+  const res = await fetch(url, {
+    method: 'DELETE',
+    headers: {
+      Authorization: botAuthorizationHeader(env.DISCORD_TOKEN),
+    },
+  });
+  if (!res.ok) {
+    const responseBody = await res.text();
+    console.error(
+      'Discord interaction DELETE failed:',
+      JSON.stringify({
+        status: res.status,
+        statusText: res.statusText,
+        responseBody: responseBody.slice(0, 1000),
+      }),
+    );
+  }
+}
+
+async function postDiscordInteractionFollowup(env, interaction, data) {
+  const applicationId =
+    interaction.application_id ?? env.DISCORD_APPLICATION_ID;
+  const url = `https://discord.com/api/v10/webhooks/${applicationId}/${interaction.token}?wait=true`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8',
+      Authorization: botAuthorizationHeader(env.DISCORD_TOKEN),
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const responseBody = await res.text();
+    console.error(
+      'Discord interaction follow-up failed:',
+      JSON.stringify({
+        status: res.status,
+        statusText: res.statusText,
+        responseBody: responseBody.slice(0, 1000),
+      }),
     );
   }
 }
