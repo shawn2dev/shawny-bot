@@ -1,16 +1,11 @@
-# Cloudflare worker example app
+# Shawny Bot
 
-awwbot is an example app that brings the cuteness of `r/aww` straight to your Discord server, hosted on Cloudflare workers. Cloudflare Workers are a convenient way to host Discord bots due to the free tier, simple development model, and automatically managed environment (no VMs!).
-
-The tutorial for building awwbot is [in the developer documentation](https://discord.com/developers/docs/tutorials/hosting-on-cloudflare-workers)
-
-![awwbot in action](https://user-images.githubusercontent.com/534619/157503404-a6c79d1b-f0d0-40c2-93cb-164f9df7c138.gif)
+Shawny Bot is a Discord bot hosted on Cloudflare Workers, with slash commands and an owner-managed user approval list stored in Cloudflare KV.
 
 ## Resources used
 
 - [Discord Interactions API](https://discord.com/developers/docs/interactions/receiving-and-responding)
 - [Cloudflare Workers](https://workers.cloudflare.com/) for hosting
-- [Reddit API](https://www.reddit.com/dev/api/) to send messages back to the user
 
 ---
 
@@ -22,7 +17,6 @@ Below is a basic overview of the project structure:
 ├── .github/workflows/ci.yaml -> Github Action configuration
 ├── src
 │   ├── commands.js           -> JSON payloads for commands
-│   ├── reddit.js             -> Interactions with the Reddit API
 │   ├── register.js           -> Sets up commands with the Discord API
 │   ├── server.js             -> Discord app logic and routing
 ├── test

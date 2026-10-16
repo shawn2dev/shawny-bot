@@ -51,6 +51,13 @@ export const BLOCK_COMMAND = {
   options: [userOption],
   ...userAndGuildInstall,
 };
+
+export const APPROVED_COMMAND = {
+  name: 'approved',
+  description: 'List approved users (owner only)',
+  ...userAndGuildInstall,
+};
+
 export const EMOJI_COMMAND = {
   name: '이모지확대',
   description: '이모지를 크게 보여줍니다.',

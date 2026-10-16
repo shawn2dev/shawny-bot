@@ -1,4 +1,10 @@
-import { YA_COMMAND, APPROVE_COMMAND, BLOCK_COMMAND, EMOJI_COMMAND } from './commands.js';
+import {
+  YA_COMMAND,
+  APPROVE_COMMAND,
+  APPROVED_COMMAND,
+  BLOCK_COMMAND,
+  EMOJI_COMMAND,
+} from './commands.js';
 import dotenv from 'dotenv';
 import process from 'node:process';
 
@@ -34,7 +40,13 @@ const response = await fetch(url, {
     Authorization: `Bot ${token}`,
   },
   method: 'PUT',
-  body: JSON.stringify([YA_COMMAND, EMOJI_COMMAND, APPROVE_COMMAND, BLOCK_COMMAND]),
+  body: JSON.stringify([
+    YA_COMMAND,
+    EMOJI_COMMAND,
+    APPROVE_COMMAND,
+    BLOCK_COMMAND,
+    APPROVED_COMMAND,
+  ]),
 });
 
 if (response.ok) {

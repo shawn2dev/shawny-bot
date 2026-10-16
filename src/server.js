@@ -12,6 +12,7 @@ import {
 import {
   YA_COMMAND,
   APPROVE_COMMAND,
+  APPROVED_COMMAND,
   BLOCK_COMMAND,
   EMOJI_COMMAND,
 } from './commands.js';
@@ -120,10 +121,11 @@ router.post('/', async (request, env, ctx) => {
       await logTask;
     }
 
-    // Owner-only: approve / block (no whitelist check)
+    // Owner-only: approve / block / approved (no whitelist check)
     if (
       commandName === APPROVE_COMMAND.name.toLowerCase() ||
-      commandName === BLOCK_COMMAND.name.toLowerCase()
+      commandName === BLOCK_COMMAND.name.toLowerCase() ||
+      commandName === APPROVED_COMMAND.name.toLowerCase()
     ) {
       if (userId !== env.OWNER_ID) {
         return new JsonResponse({
@@ -131,6 +133,20 @@ router.post('/', async (request, env, ctx) => {
           data: {
             content: '권한 없음',
             flags: InteractionResponseFlags.EPHEMERAL,
+          },
+        });
+      }
+      if (commandName === APPROVED_COMMAND.name.toLowerCase()) {
+        const current = await env.ALLOWED_USERS.get('list');
+        const list = current ? JSON.parse(current) : [];
+        return new JsonResponse({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: list.length
+              ? list.map((id) => `<@${id}>`).join(', ')
+              : 'No approved users.',
+            flags: InteractionResponseFlags.EPHEMERAL,
+            allowed_mentions: { parse: [] },
           },
         });
       }
